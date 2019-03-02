@@ -27,11 +27,17 @@ except ImportError:
 
 try:
     from pathlib import Path
-    PYTORCH_PRETRAINED_BERT_CACHE = Path(os.getenv('PYTORCH_PRETRAINED_BERT_CACHE',
-                                                   Path.home() / '.pytorch_pretrained_bert'))
+    cwd_path = os.getcwd()
+    if not cwd_path.endswith('pytorch-pretrained-BERT'):
+        cwd_path = os.path.join(cwd_path.split('pytorch-pretrained-BERT')[0], 'pytorch-pretrained-BERT')
+    PYTORCH_PRETRAINED_BERT_CACHE = Path(os.getenv('PYTORCH_PRETRAINED_BERT_CACHE', os.path.join(cwd_path, '.pytorch_pretrained_bert')))
+    # PYTORCH_PRETRAINED_BERT_CACHE = Path(os.getenv('PYTORCH_PRETRAINED_BERT_CACHE',
+    #                                                Path.home() / '.pytorch_pretrained_bert'))
+
 except AttributeError:
-    PYTORCH_PRETRAINED_BERT_CACHE = os.getenv('PYTORCH_PRETRAINED_BERT_CACHE',
-                                              os.path.join(os.path.expanduser("~"), '.pytorch_pretrained_bert'))
+    PYTORCH_PRETRAINED_BERT_CACHE = os.getenv('PYTORCH_PRETRAINED_BERT_CACHE',os.path.join(cwd_path, '.pytorch_pretrained_bert'))
+    # PYTORCH_PRETRAINED_BERT_CACHE = os.getenv('PYTORCH_PRETRAINED_BERT_CACHE',
+    #                                           os.path.join(os.path.expanduser("~"), '.pytorch_pretrained_bert'))
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 

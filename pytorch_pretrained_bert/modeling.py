@@ -620,9 +620,9 @@ class BertPreTrainedModel(nn.Module):
             for name, child in module._modules.items():
                 if child is not None:
                     load(child, prefix + name + '.')
-        start_prefix = ''
+        start_prefix = ''          # It will take bert and cls weight. You can find cls from BertForMaskedLM. 
         if not hasattr(model, 'bert') and any(s.startswith('bert.') for s in state_dict.keys()):
-            start_prefix = 'bert.'
+            start_prefix = 'bert.' # It will just take bert data. This is just for BertModel
         load(model, prefix=start_prefix)
         if len(missing_keys) > 0:
             logger.info("Weights of {} not initialized from pretrained model: {}".format(
@@ -688,6 +688,23 @@ class BertModel(BertPreTrainedModel):
         self.apply(self.init_bert_weights)
 
     def forward(self, input_ids, token_type_ids=None, attention_mask=None, output_all_encoded_layers=True):
+        '''
+        Input:
+            input_ids: token index from vocab and sequence.
+                a torch.LongTensor of shape [batch_size, sequence_length] with the word token indices in the vocabulary 
+            token_type_ids: sequence A or B using 0 and 1 to represent
+                an optional torch.LongTensor of shape [batch_size, sequence_length] with the token types indices selected in [0, 1]. Type 0 corresponds to a sentence A and type 1 corresponds to a sentence B token
+            attention_mask: tell us this token is pad or real token using 0 and 1 to represent
+                an optional torch.LongTensor of shape [batch_size, sequence_length] with indices selected in [0, 1]. It's a mask to be used if some input sequence lengths are smaller than the max input sequence length of the current batch. It's the mask that we typically use for attention when a batch has varying length sentences.
+            output_all_encoded_layers: if TRUE, output all layer ; else output the final layer
+                boolean which controls the content of the encoded_layers output as described below. Default: True.
+
+        Output:
+            encoded_layers: controled by the value of the output_encoded_layers argument:
+                output_all_encoded_layers=True: outputs a list of the encoded-hidden-states at the end of each attention block (i.e. 12 full sequences for BERT-base, 24 for BERT-large), each encoded-hidden-state is a torch.FloatTensor of size [batch_size, sequence_length, hidden_size],
+                output_all_encoded_layers=False: outputs only the encoded-hidden-states corresponding to the last attention block, i.e. a single torch.FloatTensor of size [batch_size, sequence_length, hidden_size],
+            pooled_output: a torch.FloatTensor of size [batch_size, hidden_size] which is the output of a classifier pretrained on top of the hidden state associated to the first character of the input (CLF) to train on the Next-Sentence task (see BERT's paper).
+        '''
         if attention_mask is None:
             attention_mask = torch.ones_like(input_ids)
         if token_type_ids is None:

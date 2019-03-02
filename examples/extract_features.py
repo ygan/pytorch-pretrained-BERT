@@ -192,9 +192,9 @@ def main():
     parser = argparse.ArgumentParser()
 
     ## Required parameters
-    parser.add_argument("--input_file", default=None, type=str, required=True)
-    parser.add_argument("--output_file", default=None, type=str, required=True)
-    parser.add_argument("--bert_model", default=None, type=str, required=True,
+    parser.add_argument("--input_file", default='/home/yj/Documents/Python/Github/pytorch-pretrained-BERT/samples/sample_text.txt', type=str)
+    parser.add_argument("--output_file", default='/home/yj/Documents/Python/Github/pytorch-pretrained-BERT/samples/ex_fea_sample_text.txt', type=str)
+    parser.add_argument("--bert_model", default='bert-base-uncased', type=str, 
                         help="Bert pre-trained model selected in the list: bert-base-uncased, "
                              "bert-large-uncased, bert-base-cased, bert-base-multilingual, bert-base-chinese.")
 
@@ -208,12 +208,14 @@ def main():
     parser.add_argument("--local_rank",
                         type=int,
                         default=-1,
-                        help = "local_rank for distributed training on gpus")
+                        help = "local_rank for distributed training on gpus. \
+                        If this is a number, it means using certain GPU to run.")
     parser.add_argument("--no_cuda",
                         action='store_true',
                         help="Whether not to use CUDA when available")
 
     args = parser.parse_args()
+    args.do_lower_case = True
 
     if args.local_rank == -1 or args.no_cuda:
         device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
@@ -230,9 +232,10 @@ def main():
     tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=args.do_lower_case)
 
     examples = read_examples(args.input_file)
-
+    # for e in examples:
+    #     print(e.unique_id,'@@',e.text_a,'@@',e.text_b)
     features = convert_examples_to_features(
-        examples=examples, seq_length=args.max_seq_length, tokenizer=tokenizer)
+        examples=examples, seq_length=args.max_seq_length, tokenizer=tokenizer) # tokenize by vocab
 
     unique_id_to_feature = {}
     for feature in features:
@@ -241,10 +244,10 @@ def main():
     model = BertModel.from_pretrained(args.bert_model)
     model.to(device)
 
-    if args.local_rank != -1:
+    if args.local_rank != -1:    # define using which device. Singal GPU
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank],
                                                           output_device=args.local_rank)
-    elif n_gpu > 1:
+    elif n_gpu > 1:             # Multi GPU
         model = torch.nn.DataParallel(model)
 
     all_input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
@@ -264,6 +267,9 @@ def main():
             input_ids = input_ids.to(device)
             input_mask = input_mask.to(device)
 
+            # output_all_encoded_layers default is True
+            # So all_encoder_layers is a list of 12 element since the number of layer is 12. It depend on config file.
+            # The shape of every element in all_encoder_layers is (32, 128, 768) = (batch, seq_len, hidden)
             all_encoder_layers, _ = model(input_ids, token_type_ids=None, attention_mask=input_mask)
             all_encoder_layers = all_encoder_layers
 
