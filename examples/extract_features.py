@@ -192,8 +192,9 @@ def main():
     parser = argparse.ArgumentParser()
 
     ## Required parameters
-    parser.add_argument("--input_file", default='/home/yj/Documents/Python/Github/pytorch-pretrained-BERT/samples/sample_text.txt', type=str)
-    parser.add_argument("--output_file", default='/home/yj/Documents/Python/Github/pytorch-pretrained-BERT/samples/ex_fea_sample_text.txt', type=str)
+    from main_path import MAIN_PATH
+    parser.add_argument("--input_file", default=MAIN_PATH()+'/pytorch-pretrained-BERT/samples/sample_text.txt', type=str)
+    parser.add_argument("--output_file", default=MAIN_PATH()+'/pytorch-pretrained-BERT/samples/ex_sample_text.txt', type=str)
     parser.add_argument("--bert_model", default='bert-base-uncased', type=str, 
                         help="Bert pre-trained model selected in the list: bert-base-uncased, "
                              "bert-large-uncased, bert-base-cased, bert-base-multilingual, bert-base-chinese.")
