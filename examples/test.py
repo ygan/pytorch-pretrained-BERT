@@ -1,5 +1,5 @@
 import torch
-from pytorch_pretrained_bert import BertTokenizer, BertModel, BertForMaskedLM
+from pytorch_pretrained_bert import BertTokenizer, BertModel, BertForMaskedLM, BertForSequenceClassification
 
 # OPTIONAL: if you want to have more information on what's happening, activate the logger as follows
 import logging
