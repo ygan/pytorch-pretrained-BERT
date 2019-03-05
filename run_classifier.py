@@ -625,9 +625,9 @@ def main():
     model.to(device)
 
     tcsv_n,tcsv_p = param_optimizer[5]
-    tensorToCsv2D(tcsv_p,MAIN_PATH()+'/pytorch-pretrained-BERT/samples/MRPC/beforeTrain.csv')
+    tensorToCsv2D(tcsv_p,MAIN_PATH()+'/pytorch-pretrained-BERT/samples/MRPC/afterTrain.csv')
     tcsv_n,tcsv_p = param_optimizer[181]
-    tensorToCsv2D(tcsv_p,MAIN_PATH()+'/pytorch-pretrained-BERT/samples/MRPC/beforeTrain.csv')
+    tensorToCsv2D(tcsv_p,MAIN_PATH()+'/pytorch-pretrained-BERT/samples/MRPC/afterTrain.csv')
 
     if args.do_eval and (args.local_rank == -1 or torch.distributed.get_rank() == 0):
         eval_examples = processor.get_dev_examples(args.data_dir)
